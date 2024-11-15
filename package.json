@@ -1,0 +1,21 @@
+{
+  "name": "rive-out-of-band-images-js",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel ./src/index.html",
+    "build": "parcel build ./src/index.html"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0",
+    "parcel-plugin-static-files-copy": "^2.6.0"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@rive-app/canvas": "2.19.6"
+  },
+  "staticFiles": {
+    "staticPath": "src",
+    "staticOutPath": "static"
+  }
+}
