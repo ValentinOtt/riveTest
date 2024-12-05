@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "dependencies": {
-    "@rive-app/canvas": "2.19.6"
+    "@rive-app/canvas": "2.23.11"
   },
   "staticFiles": {
     "staticPath": "src",

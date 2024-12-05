@@ -5,7 +5,7 @@ const canvas = document.getElementById("rive-canvas");
 
 // Create a more responsive layout
 const layout = new Layout({
-    fit: Fit.Contain,  
+    fit: Fit.Layout,  
     alignment: Alignment.Center,
 });
 
@@ -84,7 +84,7 @@ const loadImageAsset = async (asset) => {
 };
 
 // Import the Rive file as a URL
-const riveFile = new URL('./ad_9.riv', import.meta.url);
+const riveFile = new URL('./banner.riv', import.meta.url);
 
 // New Rive instance
 const r = new Rive({
@@ -92,8 +92,8 @@ const r = new Rive({
     canvas: canvas,
     layout: layout,
     autoplay: true,
-    stateMachines: "Main Runtime SM",
-    artboard: "Main Runtime 1",
+    stateMachines: "Top Bar SM",
+    artboard: "Top Bar",
     onLoad: () => {
         console.log('Animation loaded successfully');
         console.log('Available state machines:', r.stateMachineNames);
@@ -142,7 +142,7 @@ function updateCanvasSize() {
     
     // Update Rive layout
     r.layout = new Layout({
-        fit: Fit.Contain,
+        fit: Fit.Layout,
         alignment: Alignment.Center,
     });
     
@@ -150,11 +150,9 @@ function updateCanvasSize() {
     r.resizeDrawingSurfaceToCanvas();
 }
 
-// Add window resize handler with debounce
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        updateCanvasSize();
-    }, 100);
-}, false);
+// Add window resize listener
+window.addEventListener('resize', updateCanvasSize);
+
+// Add device pixel ratio change listener
+window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+    .addEventListener('change', updateCanvasSize);
