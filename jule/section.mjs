@@ -1,27 +1,22 @@
-import "./style.css";
 import { Rive, Fit, Alignment, Layout, decodeImage, decodeFont } from "@rive-app/canvas";
 
 const canvas = document.getElementById("rive-canvas");
 
-// Create a more responsive layout
+// Create a responsive layout
 const layout = new Layout({
-    fit: Fit.Contain,  
+    fit: Fit.Layout,  
     alignment: Alignment.Center,
 });
 
-// Import all asset files
+// Import asset files that are used in the Rive animation
 const assetFiles = {
-    'Badge New 3': new URL('./Badge New 3-2705903.webp', import.meta.url),
-    'Badge New 2': new URL('./Badge New 2-2699150.webp', import.meta.url),
-    'Badge New 1 F': new URL('./Badge New 1 F-2699137.webp', import.meta.url),
-    'Badge New 3 f': new URL('./Badge New 3 f-2705904.webp', import.meta.url),
-    'kit1_1': new URL('./kit1_1-2672703.png', import.meta.url),
-    'kit1_2': new URL('./kit1_2-2672706.png', import.meta.url),
-    'kit1_3': new URL('./kit1_3-2672705.png', import.meta.url),
-    'kit1_4': new URL('./kit1_4-2672707.png', import.meta.url),
+    'Clausten': new URL('./Clausten-2952506.ttf', import.meta.url),
     'Inter': new URL('./Inter-594377.ttf', import.meta.url),
     'Le Monde Livre Std': new URL('./Le Monde Livre Std-2242253.ttf', import.meta.url),
-    'Tall 2': new URL('./Tall 2-2701872.jpeg', import.meta.url)
+    'Assets 2': new URL('./Assets 2-2951427.webp', import.meta.url),
+    'Ball TExt': new URL('./Ball TExt-2951401.webp', import.meta.url),
+    'Homepage Banner Hero - Mobile-1': new URL('./Homepage Banner Hero - Mobile-1-2952490.jpeg', import.meta.url),
+    'Homepage Banner Hero - Mobile': new URL('./Homepage Banner Hero - Mobile-2956052.jpeg', import.meta.url)
 };
 
 // Function to load font asset
@@ -38,11 +33,9 @@ const loadFontAsset = async (asset) => {
         const arrayBuffer = await response.arrayBuffer();
         const font = await decodeFont(new Uint8Array(arrayBuffer));
         
-        // Set the font to the asset
         asset.setFont(font);
         console.log(`Font loaded successfully: ${fontName}`);
         
-        // Clean up the font reference
         font.unref();
         return true;
     } catch (error) {
@@ -66,15 +59,12 @@ const loadImageAsset = async (asset) => {
         const arrayBuffer = await blob.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Decode the image
         const image = await decodeImage(uint8Array);
         console.log('Image decoded successfully:', asset.name);
         
-        // Set the image to the asset
         asset.setRenderImage(image);
         console.log('Image set to asset successfully:', asset.name);
         
-        // Release the reference
         image.unref();
         return true;
     } catch (error) {
@@ -83,78 +73,55 @@ const loadImageAsset = async (asset) => {
     }
 };
 
-// Import the Rive file as a URL
-const riveFile = new URL('./banner.riv', import.meta.url);
+// Import the Rive file
+const riveFile = new URL('./ad_12_runtime.riv', import.meta.url);
 
-// New Rive instance
+// Create new Rive instance
 const r = new Rive({
     src: riveFile.href,
     canvas: canvas,
     layout: layout,
     autoplay: true,
-    stateMachines: "Logo SM",
-    artboard: "Logo",
+    stateMachines: "State Machine 1",
+    artboard: "Wide RT",
     onLoad: () => {
         console.log('Animation loaded successfully');
         console.log('Available state machines:', r.stateMachineNames);
         console.log('Current artboard:', r.activeArtboard?.name);
-        
-        // Initial resize
-        updateCanvasSize();
     },
     onLoadError: (err) => {
         console.error('Error loading animation:', err);
     },
-    assetLoader: (asset, bytes) => {
-        console.log('Asset loader called for:', {
-            name: asset.name,
-            fileExtension: asset.fileExtension,
-            isImage: asset.isImage,
-            isFont: asset.isFont,
-            cdnUuid: asset.cdnUuid
-        });
-
-        // If the asset has bytes or a CDN UUID, let Rive handle it
-        if (asset.cdnUuid.length > 0 || bytes.length > 0) {
-            return false;
-        }
-
-        if (asset.isImage) {
-            return loadImageAsset(asset);
-        } else if (asset.isFont) {
-            return loadFontAsset(asset);
-        }
+    assetLoader: async (asset, _bytes) => {
+        console.log('Loading asset:', asset.name, 'Type:', asset.cdnUuid);
         
-        console.log('Asset not handled by our loader');
+        if (asset.isFont) {
+            return await loadFontAsset(asset);
+        } else if (asset.isImage) {
+            return await loadImageAsset(asset);
+        }
         return false;
     }
 });
 
 // Function to update canvas size
-function updateCanvasSize() {
-    const container = canvas.parentElement;
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+const updateCanvasSize = () => {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     
-    // Set canvas size to match container
-    canvas.width = containerWidth;
-    canvas.height = containerHeight;
+    canvas.width = width * devicePixelRatio;
+    canvas.height = height * devicePixelRatio;
     
-    // Update Rive layout
-    r.layout = new Layout({
-        fit: Fit.Contain,
-        alignment: Alignment.Center,
-    });
-    
-    // Resize the drawing surface
-    r.resizeDrawingSurfaceToCanvas();
-}
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+};
 
-// Add window resize handler with debounce
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        updateCanvasSize();
-    }, 100);
-}, false);
+// Add window resize listener
+window.addEventListener('resize', updateCanvasSize);
+
+// Initial canvas size setup
+updateCanvasSize();
+
+// Handle device pixel ratio changes
+window.matchMedia('(resolution)').addEventListener('change', updateCanvasSize);
